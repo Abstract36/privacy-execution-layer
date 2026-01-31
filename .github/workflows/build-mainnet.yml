@@ -43,13 +43,11 @@ jobs:
           path: target
           key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
       
-      - name: Install Solana CLI ${{ github.event.inputs.solana_version }}
+      - name: Install and verify Solana CLI ${{ github.event.inputs.solana_version }}
         run: |
           sh -c "$(curl -sSfL https://release.solana.com/${{ github.event.inputs.solana_version }}/install)"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
-      
-      - name: Verify Solana CLI installation
-        run: |
           solana --version
           cargo build-sbf --version
       
