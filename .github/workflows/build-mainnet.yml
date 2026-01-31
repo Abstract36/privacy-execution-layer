@@ -45,9 +45,22 @@ jobs:
       
       - name: Install and verify Solana CLI ${{ github.event.inputs.solana_version }}
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/${{ github.event.inputs.solana_version }}/install)"
+          # Download Solana CLI directly from GitHub releases
+          SOLANA_VERSION="${{ github.event.inputs.solana_version }}"
+          SOLANA_VERSION_NUM="${SOLANA_VERSION#v}"
+          
+          wget -q "https://github.com/solana-labs/solana/releases/download/${SOLANA_VERSION}/solana-release-x86_64-unknown-linux-gnu.tar.bz2"
+          tar -xjf solana-release-x86_64-unknown-linux-gnu.tar.bz2
+          
+          # Move to standard location
+          mkdir -p "$HOME/.local/share/solana/install/active_release"
+          mv solana-release/bin "$HOME/.local/share/solana/install/active_release/"
+          
+          # Update PATH
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          
+          # Verify installation
           solana --version
           cargo build-sbf --version
       
