@@ -6,11 +6,11 @@ on:
       rust_version:
         description: 'Rust version to use'
         required: false
-        default: '1.81.0'
+        default: '1.85.0'
       solana_version:
         description: 'Solana CLI version'
         required: false
-        default: 'v1.18.18'
+        default: 'v2.0.3'
 
 jobs:
   build:
