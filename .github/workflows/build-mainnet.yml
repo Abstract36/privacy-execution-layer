@@ -1,0 +1,100 @@
+name: Build Mainnet Programs
+
+on:
+  workflow_dispatch:
+    inputs:
+      rust_version:
+        description: 'Rust version to use'
+        required: false
+        default: '1.75.0'
+      solana_version:
+        description: 'Solana CLI version'
+        required: false
+        default: 'v1.18.18'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Rust ${{ github.event.inputs.rust_version }}
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ github.event.inputs.rust_version }}
+      
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache Cargo index
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Cache target directory
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: Install Solana CLI ${{ github.event.inputs.solana_version }}
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/${{ github.event.inputs.solana_version }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+      
+      - name: Verify Solana CLI installation
+        run: |
+          solana --version
+          cargo build-sbf --version
+      
+      - name: Build time_vault program
+        run: |
+          cargo build-sbf --manifest-path=programs/time_vault/Cargo.toml
+          ls -lh target/deploy/time_vault.so
+      
+      - name: Build verifier program
+        run: |
+          cargo build-sbf --manifest-path=programs/verifier/Cargo.toml
+          ls -lh target/deploy/verifier.so
+      
+      - name: Generate program addresses
+        run: |
+          echo "## Program Addresses" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**time_vault:**" >> $GITHUB_STEP_SUMMARY
+          solana address -k target/deploy/time_vault-keypair.json >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**verifier:**" >> $GITHUB_STEP_SUMMARY
+          solana address -k target/deploy/verifier-keypair.json >> $GITHUB_STEP_SUMMARY
+      
+      - name: Upload program binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: mainnet-programs
+          path: |
+            target/deploy/time_vault.so
+            target/deploy/verifier.so
+            target/deploy/time_vault-keypair.json
+            target/deploy/verifier-keypair.json
+          retention-days: 30
+      
+      - name: Create build summary
+        run: |
+          echo "## Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Programs built successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Binaries:**" >> $GITHUB_STEP_SUMMARY
+          echo "- time_vault.so: $(stat -c%s target/deploy/time_vault.so) bytes" >> $GITHUB_STEP_SUMMARY
+          echo "- verifier.so: $(stat -c%s target/deploy/verifier.so) bytes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
+          echo "1. Download artifacts from this workflow run" >> $GITHUB_STEP_SUMMARY
+          echo "2. Verify binaries with \`solana program dump\`" >> $GITHUB_STEP_SUMMARY
+          echo "3. Deploy to mainnet with \`./scripts/deploy_mainnet.sh\`" >> $GITHUB_STEP_SUMMARY
