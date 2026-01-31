@@ -6,7 +6,7 @@ on:
       rust_version:
         description: 'Rust version to use'
         required: false
-        default: '1.78.0'
+        default: '1.85.0'
       solana_version:
         description: 'Solana CLI version'
         required: false
