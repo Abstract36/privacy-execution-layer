@@ -20,6 +20,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Remove Cargo.lock v4 immediately
+        run: |
+          rm -f Cargo.lock
+          echo "Removed Cargo.lock v4 from repository"
+      
       - name: Install Rust ${{ github.event.inputs.rust_version }}
         uses: dtolnay/rust-toolchain@master
         with:
@@ -64,11 +69,7 @@ jobs:
           solana --version
           cargo build-sbf --version
       
-      - name: Remove Cargo.lock v4 (incompatible with Solana CLI 1.18.x)
-        run: |
-          rm -f Cargo.lock
-          echo "Removed Cargo.lock - will be regenerated during build"
-      
+
       - name: Build private-pool program
         run: |
           cargo build-sbf --manifest-path=programs/private-pool/Cargo.toml
