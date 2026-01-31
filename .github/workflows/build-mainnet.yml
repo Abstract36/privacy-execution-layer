@@ -20,11 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Remove Cargo.lock v4 immediately
-        run: |
-          rm -f Cargo.lock
-          echo "Removed Cargo.lock v4 from repository"
-      
       - name: Install Rust ${{ github.event.inputs.rust_version }}
         uses: dtolnay/rust-toolchain@master
         with:
