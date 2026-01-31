@@ -10,7 +10,7 @@ on:
       solana_version:
         description: 'Solana CLI version'
         required: false
-        default: 'v2.0.3'
+        default: 'v1.18.26'
 
 jobs:
   build:
@@ -63,6 +63,11 @@ jobs:
           # Verify installation
           solana --version
           cargo build-sbf --version
+      
+      - name: Remove Cargo.lock v4 (incompatible with Solana CLI 1.18.x)
+        run: |
+          rm -f Cargo.lock
+          echo "Removed Cargo.lock - will be regenerated during build"
       
       - name: Build private-pool program
         run: |
