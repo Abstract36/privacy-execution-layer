@@ -64,35 +64,25 @@ jobs:
           solana --version
           cargo build-sbf --version
       
-      - name: Build time_vault program
+      - name: Build private-pool program
         run: |
-          cargo build-sbf --manifest-path=programs/time_vault/Cargo.toml
-          ls -lh target/deploy/time_vault.so
+          cargo build-sbf --manifest-path=programs/private-pool/Cargo.toml
+          ls -lh target/deploy/private_pool.so
       
-      - name: Build verifier program
+      - name: Generate program address
         run: |
-          cargo build-sbf --manifest-path=programs/verifier/Cargo.toml
-          ls -lh target/deploy/verifier.so
-      
-      - name: Generate program addresses
-        run: |
-          echo "## Program Addresses" >> $GITHUB_STEP_SUMMARY
+          echo "## Program Address" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**time_vault:**" >> $GITHUB_STEP_SUMMARY
-          solana address -k target/deploy/time_vault-keypair.json >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**verifier:**" >> $GITHUB_STEP_SUMMARY
-          solana address -k target/deploy/verifier-keypair.json >> $GITHUB_STEP_SUMMARY
+          echo "**private_pool:**" >> $GITHUB_STEP_SUMMARY
+          solana address -k target/deploy/private_pool-keypair.json >> $GITHUB_STEP_SUMMARY
       
       - name: Upload program binaries
         uses: actions/upload-artifact@v4
         with:
           name: mainnet-programs
           path: |
-            target/deploy/time_vault.so
-            target/deploy/verifier.so
-            target/deploy/time_vault-keypair.json
-            target/deploy/verifier-keypair.json
+            target/deploy/private_pool.so
+            target/deploy/private_pool-keypair.json
           retention-days: 30
       
       - name: Create build summary
@@ -101,9 +91,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✅ Programs built successfully" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Binaries:**" >> $GITHUB_STEP_SUMMARY
-          echo "- time_vault.so: $(stat -c%s target/deploy/time_vault.so) bytes" >> $GITHUB_STEP_SUMMARY
-          echo "- verifier.so: $(stat -c%s target/deploy/verifier.so) bytes" >> $GITHUB_STEP_SUMMARY
+          echo "**Binary:**" >> $GITHUB_STEP_SUMMARY
+          echo "- private_pool.so: $(stat -c%s target/deploy/private_pool.so) bytes" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Next Steps:**" >> $GITHUB_STEP_SUMMARY
           echo "1. Download artifacts from this workflow run" >> $GITHUB_STEP_SUMMARY
