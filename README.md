@@ -10,15 +10,36 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Phase-2%20Complete-green" alt="Phase 2">
-  <img src="https://img.shields.io/badge/Status-Experimental-orange" alt="Experimental">
+  <img src="https://img.shields.io/badge/Status-Archived-lightgrey" alt="Archived">
+  <img src="https://img.shields.io/badge/Build-does%20not%20compile-red" alt="Does not compile">
   <img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT License">
-  <img src="https://img.shields.io/badge/Solana-Devnet-purple" alt="Solana Devnet">
 </p>
 
 ---
 
-> ⚠️ **EXPERIMENTAL SOFTWARE** — Not audited. Do NOT use with real funds.
+> ## ⚠️ Archived on 2026-11-05 — the code does not compile
+>
+> Read the rest of this document as a design sketch, not as a description of
+> working software. Measured before archiving:
+>
+> - **The program does not build.** `declare_id!` is called with
+>   `privPoo1AAAA…`, a placeholder that is not a valid Solana public key — it
+>   decodes to 33 bytes instead of 32. That failure cascades: `ID` is never
+>   defined, so the `#[program]` macro fails in both crates. Separately,
+>   `#[derive(Default)]` is applied to a struct holding `[u8; 8192]`, which Rust
+>   does not implement `Default` for.
+> - **CI never passed.** Nineteen runs, zero successes, across the repository's
+>   whole history.
+> - **There are no tests.** `anchor test` runs `ts-mocha` over `tests/**/*.ts`,
+>   and no `tests/` directory exists.
+> - **The toolchain requirements contradict each other.** `anchor-cli 0.29.0`
+>   pinned by `--locked` needs Rust older than 1.80; the committed `Cargo.lock`
+>   needs Rust 1.85 or newer.
+>
+> The feature table below marks items complete. Those marks describe what was
+> designed, not what runs. Nothing here has ever executed on a Solana cluster.
+>
+> **Not audited. Never use with real funds.**
 
 ## Overview
 
